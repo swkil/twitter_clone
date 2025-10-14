@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider; // <<< [추가] import
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider; // <<< [추가] import
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,17 +20,17 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return loginId -> {
-            try {
-                Long userId = Long.parseLong(loginId);
-                return userRepository.findById(userId)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
-            } catch (NumberFormatException e) {
-                return userRepository.findByEmail(loginId)
-                        .or(() -> userRepository.findByUsername(loginId))
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            }
-        };
+        return loginId -> userRepository.findByEmail(loginId)
+                .or(() -> userRepository.findByUsername(loginId))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with identifier: " + loginId));
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
 
     @Bean
