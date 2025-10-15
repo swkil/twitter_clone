@@ -6,6 +6,8 @@ import com.example.backend.entity.Post;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
+import com.example.backend.repository.CommentRepository;
+import com.example.backend.repository.LikeRepository;
 import com.example.backend.repository.PostRepository;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
 
     public PostResponse createPost(PostRequest request) {
         User detachedUser = authenticationService.getCurrentUser();
@@ -48,7 +52,14 @@ public class PostService {
         Page<Post> posts = postRepository.findAllActive(pageable);
         return posts.map(post -> {
             PostResponse response = PostResponse.fromEntity(post);
-            // like, comment 등 추가
+            Long commentCount = commentRepository.countByPostId(post.getId());
+            Long likeCount = likeRepository.countByPostId(post.getId());
+            boolean isLiked = likeRepository.existsByUserAndPost(currentUser, post);
+            // 북마크 추가 예정
+
+            response.setCommentCount(commentCount);
+            response.setLikeCount(likeCount);
+            response.setLiked(isLiked);
 
             return response;
         });
@@ -61,7 +72,14 @@ public class PostService {
         Page<Post> posts = postRepository.findByUserIdAndNotDeleted(userId, pageable);
         return posts.map(post -> {
             PostResponse response = PostResponse.fromEntity(post);
-            // like, comment 등 추가
+            Long commentCount = commentRepository.countByPostId(post.getId());
+            Long likeCount = likeRepository.countByPostId(post.getId());
+            boolean isLiked = likeRepository.existsByUserAndPost(currentUser, post);
+            // 북마크 추가 예정
+
+            response.setCommentCount(commentCount);
+            response.setLikeCount(likeCount);
+            response.setLiked(isLiked);
 
             return response;
         });
