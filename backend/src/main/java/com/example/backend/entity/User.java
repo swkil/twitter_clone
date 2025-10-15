@@ -98,6 +98,10 @@ public class User implements UserDetails {
     @Builder.Default
     private Set<Post> posts = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Comment> comments = new HashSet<>();
+
     @PrePersist
     protected void onCreate() { enabled = true; }
 }
