@@ -35,4 +35,17 @@ public class PostResponse {
                 .updatedAt(post.getUpdatedAt())
                 .build();
     }
+
+    public PostResponse(Post post, Long commentCount, Long likeCount, boolean isLiked) {
+        this.id = post.getId();
+        this.content = post.getContent();
+        this.imageUrl = post.getImageUrl();
+        this.user = UserDto.fromEntity(post.getUser());
+        this.createdAt = post.getCreatedAt();
+        this.updatedAt = post.getUpdatedAt();
+
+        this.commentCount = commentCount;
+        this.likeCount = likeCount;
+        this.isLiked = isLiked;
+    }
 }

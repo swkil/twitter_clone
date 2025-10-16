@@ -1,6 +1,8 @@
 package com.example.backend.repository;
 
+import com.example.backend.dto.PostResponse;
 import com.example.backend.entity.Post;
+import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -14,6 +16,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = {"user"})
     @Query("SELECT p FROM Post p WHERE p.deleted = false ORDER BY p.createdAt DESC")
     Page<Post> findAllActive(Pageable pageable);
+
+    @Query("SELECT new com.example.backend.dto.PostResponse(p, " +
+            "(SELECT COUNT(c) FROM Comment c WHERE c.post = p), " +
+            "(SELECT COUNT(l) FROM Like l WHERE l.post = p), " +
+            "EXISTS(SELECT 1 FROM Like l2 WHERE l2.post = p AND l2.user = :user)) " +
+            "FROM Post p WHERE p.deleted = false")
+    Page<PostResponse> findAllWithCounts(@Param("user") User user, Pageable pageable);
 
     @EntityGraph(attributePaths = {"user"})
     @Query("SELECT p FROM Post p WHERE p.user.id = :userId AND p.deleted = false ORDER BY p.createdAt DESC")

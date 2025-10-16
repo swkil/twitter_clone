@@ -49,20 +49,7 @@ public class PostService {
     public Page<PostResponse> getAllPosts(Pageable pageable) {
         User currentUser = authenticationService.getCurrentUser();
 
-        Page<Post> posts = postRepository.findAllActive(pageable);
-        return posts.map(post -> {
-            PostResponse response = PostResponse.fromEntity(post);
-            Long commentCount = commentRepository.countByPostId(post.getId());
-            Long likeCount = likeRepository.countByPostId(post.getId());
-            boolean isLiked = likeRepository.existsByUserAndPost(currentUser, post);
-            // 북마크 추가 예정
-
-            response.setCommentCount(commentCount);
-            response.setLikeCount(likeCount);
-            response.setLiked(isLiked);
-
-            return response;
-        });
+        return postRepository.findAllWithCounts(currentUser, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +62,6 @@ public class PostService {
             Long commentCount = commentRepository.countByPostId(post.getId());
             Long likeCount = likeRepository.countByPostId(post.getId());
             boolean isLiked = likeRepository.existsByUserAndPost(currentUser, post);
-            // 북마크 추가 예정
 
             response.setCommentCount(commentCount);
             response.setLikeCount(likeCount);
