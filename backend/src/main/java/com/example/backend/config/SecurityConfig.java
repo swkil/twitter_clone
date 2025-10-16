@@ -62,7 +62,7 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers(
                                         "/api/auth/**",
-                                        "/api/images/**",
+                                        "/images/**",
                                         "/oauth2/**",
                                         "/login/oauth2/**",
                                         "/error"

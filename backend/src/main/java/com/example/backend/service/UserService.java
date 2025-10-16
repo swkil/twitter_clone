@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.UserResponse;
+import com.example.backend.dto.UserUpdateRequest;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.FollowRepository;
@@ -8,6 +9,7 @@ import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final AuthenticationService authenticationService;
+    private final FileUploadService fileUploadService;
 
     private UserResponse mapToUserResponse(User user) {
         User currentUser = authenticationService.getCurrentUser();
@@ -54,5 +57,29 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id" + userId));
 
         return mapToUserResponse(user);
+    }
+
+    public UserResponse updateUserProfile(UserUpdateRequest request) {
+        User currentUser = authenticationService.getCurrentUser();
+
+        currentUser.setFullName(request.getFullName());
+        currentUser.setBio(request.getBio());
+
+        User updatedUser = userRepository.save(currentUser);
+
+        return mapToUserResponse(updatedUser);
+    }
+
+    @Transactional
+    public String updateProfileImage(MultipartFile file) {
+        User currentUser = authenticationService.getCurrentUser();
+
+        String storedFilename = fileUploadService.storeFile(file);
+        String imageUrl = "/images/" + storedFilename;
+
+        currentUser.setProfileImageUrl(imageUrl);
+        userRepository.save(currentUser);
+
+        return imageUrl;
     }
 }

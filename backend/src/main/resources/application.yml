@@ -23,6 +23,9 @@ spring:
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
 
+file:
+  upload-dir: C:/twitter_clone_images/
+
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
